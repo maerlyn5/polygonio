@@ -4,6 +4,9 @@ import "time"
 
 var AmericaNewYork *time.Location = nil
 
+//used for debugging
+const StringFormat = "2006-01-02 3:04:05 PM MST"
+
 func init() {
 	anyc, err := time.LoadLocation("America/New_York")
 	if err != nil {

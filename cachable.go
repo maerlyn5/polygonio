@@ -42,9 +42,11 @@ type FileCacherIo interface {
 }
 
 func (fc FileCacher) FilePath(request *http.Request) (dir string, fn string) {
+	q := request.URL.Query()
+	q.Set("apiKey", "X")
 	path := []string{fc.Dir, request.URL.Scheme, request.URL.Host}
 	path = append(path, strings.Split(request.URL.Path, "/")...)
-	return filepath.Join(path...), request.URL.RawQuery + ".json"
+	return filepath.Join(path...), q.Encode() + ".json"
 }
 
 func (fc FileCacher) Save(request *http.Request, response *http.Response) error {

@@ -147,7 +147,7 @@ func TestAggregatesResponseContainer_ClosestAggregate(t *testing.T) {
 	}
 
 	mustTime := func(f string) time.Time {
-		a, e := time.Parse("2006-01-02 3:04:05 PM MST", f)
+		a, e := time.Parse(StringFormat, f)
 		if e != nil {
 			panic(e)
 		}

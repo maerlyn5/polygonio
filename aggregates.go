@@ -63,8 +63,56 @@ type AggregatesResponse struct {
 	timespanDuration time.Duration
 }
 
+func (ag AggregatesResponse) String() string {
+	return fmt.Sprintf("%s-%s (%s) o:%s c:%s h:%s l:%s v:%s",
+		ag.UnixMiliSecInTime().Format(StringFormat),
+		ag.ImpliedEnd().Format(StringFormat),
+		ag.timespanDuration,
+		ag.Open.String(),
+		ag.Close.String(),
+		ag.High.String(),
+		ag.Low.String(),
+		ag.Volume.String(),
+	)
+}
+
+func Merge(in []AggregatesResponse) AggregatesResponse {
+
+	if len(in) == 0 {
+		panic("expected len > 0")
+	}
+
+	if len(in) == 1 {
+		return in[0]
+	}
+
+	if len(in) != 2 {
+		panic("expected len == 2")
+	}
+
+	a := in[0]
+	b := in[1]
+
+	out := a
+	out.Volume = a.Volume.Add(b.Volume)
+	out.Close = b.Close
+	if b.High.GreaterThan(out.High) {
+		out.High = b.High
+	}
+	if b.Low.LessThan(out.Low) {
+		out.Low = b.Low
+	}
+	out.N += b.N
+	out.timespanDuration = b.ImpliedEnd().Sub(a.UnixMiliSecInTime())
+	return out
+}
+
 func (ar AggregatesResponse) ImpliedEnd() time.Time {
 	return ar.UnixMiliSecInTime().Add(ar.timespanDuration)
+}
+
+func (ar AggregatesResponse) Average() decimal.Decimal {
+	return ar.Open.Add(ar.Close).Div(decimal.NewFromInt(2))
 }
 
 //UnixMiliSecInTime <= search < ImpliedEnd
